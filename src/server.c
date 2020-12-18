@@ -90,6 +90,8 @@ static void* process_client( void *paramsVP ){
     threadParam *params = (threadParam *) paramsVP;
     int commSocket = params->commSocket;
 
+    printf("guessing %s\n", word);
+
     int rqType;
     char* rq;
     //--------------------- set up uncovered word -------------------------------
@@ -141,7 +143,6 @@ static void* process_client( void *paramsVP ){
             err1("Got wrong request");
 
         sscanf(rq, "%c", &letter);
-        free(rq);
 
         if(!isalpha(letter)){
             not_alpha(commSocket);
@@ -183,7 +184,7 @@ static void* process_client( void *paramsVP ){
     pthread_mutex_unlock( &m_activeThreads );
 
     close(commSocket);
-
+    free(rq);
     return NULL;
 }
 
@@ -193,7 +194,13 @@ int main( int argc, char **argv ){
         exit( 0 );
     }
     int port;
-    sscanf(argv[1], "%d %s", &port, word);
+    sscanf(argv[1], "%d", &port);
+    sscanf(argv[2], "%s", word);
+    printf("%s", word);
+
+    for(int i=0; word[i]; i++){
+        word[i] = toupper(word[i]);
+    }
 
     int listenerSocket = socket(PF_INET, SOCK_STREAM, 0);
     if(listenerSocket == -1)
